@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>视频列表</title>
+  <link rel="stylesheet" href="/layui/css/layui.css">
+</head>
+<body>
+  <table id="videoTable" lay-filter="videoTest"></table>
+  <script src="/layui/layui.js"></script>
+  <script type="text/html" id="handleIcon">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+  </script>
+  <script>
+    layui.use(['form', 'table', 'layer', 'jquery'], function(){
+      var form = layui.form;
+      var table = layui.table;
+      var layer = layui.layer;
+      var $ = layui.$;
+      
+      //第一个实例
+      table.render({
+        elem: '#videoTable'
+        ,url: '' //数据接口
+        ,data: <%- JSON.stringify(video)%>
+        ,page: true //开启分页
+        ,cols: [[ //表头
+        {field: 'idea_time', title: '发布时间', width: 150, sort: true, fixed: 'left'}
+          ,{field: 'author', title: '作者', width: 120}
+          ,{field: 'idea_title', title: '作品标题', width: 300}
+          ,{field: 'idea_content', title: '作品简介'}
+          // ,{field: 'idea_img', title: '作品封面', align: "center", templet: function (d) { return '<div><img src='+d.idea_img+'></div>'}}
+          ,{fixed: 'right', title:'操作', toolbar: '#handleIcon', width: 300}
+        ]]
+      });
+
+      //监听行工具事件
+      table.on('tool(videoTest)', function(obj){
+        var data = obj.data;
+        if(obj.event === 'del'){
+          layer.confirm('确定删除吗？', function(index){
+            $.post("/idea/delIdea",{idea_id: data._id},function(result){
+                if(result.status = "ok"){
+                    window.location.reload();
+                }else{
+                    alert('删除失败');
+                }
+            });
+            obj.del();  //删除对应行（tr）的DOM结构
+            layer.close(index);  //向服务端发送删除指令
+          });
+        } else if(obj.event === 'detail') {
+          $.post("/idea/findOneIdea",{_id: data._id},function(res){
+              if(res.success){
+                let videoList = res.resultList
+                layer.open({
+                  type: 1 //Page层类型
+                  ,area: ['800px', '500px']
+                  ,title: '详情'
+                  ,shade: 0.6 //遮罩透明度
+                  ,maxmin: true //允许全屏最小化
+                  ,anim: 1 //0-6的动画形式，-1不开启
+                  ,success: function(layero, index){
+                    form.render();
+                    //表单初始赋值
+                    form.val('ideaForm', {
+                       "idea_id": videoList._id
+                      ,"idea_title": videoList.idea_title
+                      ,"idea_content": videoList.idea_content
+                      ,"type": videoList.type
+                    })
+                  }
+                  ,content: '<div style="padding:50px;">'
+                            +'<form class="layui-form" id="ideaForm" action="/recommend_list/recommend" method="post" lay-filter="ideaForm" >'
+
+                            +'<div style="display:none;">'
+                            +'<div class="layui-input-block">'
+                            +'<input type="text" name="idea_id" >'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div style="display:none;">'
+                            +'<div class="layui-input-block">'
+                            +'<input type="text" name="type" >'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item">'
+                            +'<label class="layui-form-label">标题</label>'
+                            +'<div class="layui-input-block">'
+                            +'<input type="text" name="idea_title" class="layui-input"  disabled="">'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item layui-form-text">'
+                            +'<label class="layui-form-label">正文</label>'
+                            +'<div class="layui-input-block">'
+                            +'<textarea name="idea_content" class="layui-textarea" disabled=""></textarea>'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item">'
+                            +'<label class="layui-form-label">封面</label>'
+                            +'<div style="width:100px;height:100px;position:relative;overflow:hidden;display: inline-block;">'
+                            +'<img style="width:100%;position:absolute;top:50%;left:50%;transform: translate(-50%, -50%);" src="'+videoList.idea_img+'"></img>'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item">'
+                            +'<label class="layui-form-label">视频文件</label>'
+                            +'<div class="layui-input-block">'
+                            +'<video width="400" height="200" controls src="'+videoList.idea_file+'"></video>'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item">'
+                            +'<div class="layui-input-block">'
+                            +'<button class="layui-btn" lay-submit lay-filter="toRecommend">送上推荐</button>'
+                            +'</div>'
+                            +'</div>'
+
+                            +'</form>'
+                            +'</div>'
+                });    
+              }else{
+                layer.msg('查看失败');
+              }
+          });
+        }
+      });
+
+      //监听提交
+      form.on('submit(toRecommend)', function(data){
+        layer.confirm('确定送上推荐吗？', {
+          btn: ['确认','取消'] //按钮
+        }, function(){
+          $("#ideaForm").submit();//重点一！！！模拟提交！！
+        }, function(){
+          layer.msg('已取消');
+          return false;
+        });
+          return false;//重点二！！！！  阻止提交行为！！
+      });
+      
+    });
+  </script>
+</body>
+</html>

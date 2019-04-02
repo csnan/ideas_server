@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>用户列表</title>
+  <link rel="stylesheet" href="/layui/css/layui.css">
+</head>
+<body>
+  <table id="usersTable" lay-filter="usersTest"></table>
+  <script src="/layui/layui.js"></script>
+  <script type="text/html" id="addIcon">
+    <div class="layui-btn-container">
+      <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+    </div>
+  </script>
+  <script type="text/html" id="handleIcon">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+  </script>
+  <script>
+    layui.use(['form', 'table', 'layer', 'upload', 'jquery'], function(){
+      var form = layui.form;
+      var table = layui.table;
+      var layer = layui.layer;
+      var upload = layui.upload;
+      var $ = layui.$;
+      
+      //第一个实例
+      table.render({
+        elem: '#usersTable'
+        ,url: '' //数据接口
+        ,toolbar: '#addIcon'
+        ,data: <%- JSON.stringify(users)%>
+        ,page: true //开启分页
+        ,cols: [[ //表头
+          {field: 'register_time', title: '注册时间', width: 150, sort: true, fixed: 'left'}
+          ,{field: 'userId', title: '用户名', width: 120}
+          ,{field: 'password', title: '密码', width: 150}
+          ,{field: 'username', title: '昵称', width: 120}
+          ,{field: 'sex', title: '性别', width: 100, sort: true, 
+            templet: function (d) {
+              if(d.sex == 'male') {
+                return '男'
+              } else if (d.sex == 'female') {
+                return '女'
+              } else {
+                return ''
+              }
+            }
+          }
+          ,{field: 'introduction', title: '个人简介'}
+          ,{fixed: 'right', title:'操作', toolbar: '#handleIcon', width: 300}
+        ]]
+      });
+
+      //监听头工具栏事件
+      table.on('toolbar(usersTest)', function(obj){
+        var data = obj.data;
+        if(obj.event === 'add'){
+          layer.open({
+            type: 1 //Page层类型
+            ,area: ['800px', '500px']
+            ,title: '详情'
+            ,shade: 0.6 //遮罩透明度
+            ,maxmin: true //允许全屏最小化
+            ,anim: 1 //0-6的动画形式，-1不开启
+            ,success: function(layero, index){
+              form.render();
+
+              //转换日期格式
+              Date.prototype.Format = function (fmt) { //author: meizz 
+                  var o = {
+                      "M+": this.getMonth() + 1, //月份 
+                      "d+": this.getDate(), //日 
+                      "h+": this.getHours(), //小时 
+                      "m+": this.getMinutes(), //分 
+                      "s+": this.getSeconds(), //秒 
+                      "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+                      "S": this.getMilliseconds() //毫秒 
+                  };
+                  if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+                  for (var k in o)
+                  if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                  return fmt;
+              }
+
+              var headImg = '';
+              var coverImg = '';
+              var register_time = new Date().Format("yyyy-MM-dd hh:mm");
+              document.getElementById("timeName").value = register_time
+
+              //头像上传
+              var uploadHeadImg = upload.render({
+                elem: '#headImgBox'
+                ,url: '/upload/upload'
+                ,before: function(obj){
+                  //预读本地文件示例，不支持ie8
+                  obj.preview(function(index, file, result){
+                    $('#headImg').attr('src', result); //图片链接（base64）
+                  });
+                }
+                ,done: function(res){
+                  headImg = 'http://localhost:3000/images/upload/' + res[0].filename
+                  document.getElementById("headImgName").value = headImg
+                }
+              });
+
+              //背景图片上传
+              var uploadCoverImg = upload.render({
+                elem: '#coverImgBox'
+                ,url: '/upload/upload'
+                ,before: function(obj){
+                  //预读本地文件示例，不支持ie8
+                  obj.preview(function(index, file, result){
+                    $('#coverImg').attr('src', result); //图片链接（base64）
+                  });
+                }
+                ,done: function(res){
+                  coverImg = 'http://localhost:3000/images/upload/' + res[0].filename
+                  document.getElementById("coverImgName").value = coverImg
+                }
+              });
+
+
+            }
+            ,content: '<div style="padding:50px;">'
+                      +'<form id="userForm" class="layui-form" action="/users_list/addUser" method="post" lay-filter="userForm" >'
+
+                      +'<div class="layui-form-item">'
+                      +'<label class="layui-form-label">头像和背景</label>'
+                      +'<div id="headImgBox" style="width:100px;height:100px;position:relative;overflow:hidden;display: inline-block;border:1px solid black;">'
+                      +'<img id="headImg" style="width:100%;position:absolute;top:50%;left:50%;transform: translate(-50%, -50%);" src=""></img>'
+                      +'</div>'
+                      +'<div id="coverImgBox" style="width:200px;height:100px;position:relative;overflow:hidden;display:inline-block;margin-left:20px;border:1px solid black;">'
+                      +'<img id="coverImg" style="width:100%;position:absolute;top:50%;left:50%;transform: translate(-50%, -50%);" src=""></img>'
+                      +'</div>'
+                      +'</div>'
+
+                      +'<div style="display:none;">'
+                      +'<div class="layui-input-block">'
+                      +'<input id="timeName" type="text" name="register_time" >'
+                      +'</div>'
+                      +'</div>'
+
+                      +'<div style="display:none;">'
+                      +'<div class="layui-input-block">'
+                      +'<input id="headImgName" type="text" name="headImg" >'
+                      +'</div>'
+                      +'</div>'
+
+                      +'<div style="display:none;">'
+                      +'<div class="layui-input-block">'
+                      +'<input id="coverImgName" type="text" name="coverImg" >'
+                      +'</div>'
+                      +'</div>'
+
+                      +'<div class="layui-form-item">'
+                      +'<label class="layui-form-label">用户名</label>'
+                      +'<div class="layui-input-block">'
+                      +'<input type="text" name="userId" lay-verify="required" autocomplete="off" placeholder="请输入用户名" class="layui-input">'
+                      +'</div>'
+                      +'</div>'
+
+                      +'<div class="layui-form-item">'
+                      +'<label class="layui-form-label">密码</label>'
+                      +'<div class="layui-input-block">'
+                      +'<input type="text" name="password" lay-verify="required" autocomplete="off" placeholder="请输入密码" class="layui-input">'
+                      +'</div>'
+                      +'</div>'
+
+                      +'<div class="layui-form-item">'
+                      +'<label class="layui-form-label">昵称</label>'
+                      +'<div class="layui-input-block">'
+                      +'<input type="text" name="username" lay-verify="required" autocomplete="off" placeholder="请输入昵称" class="layui-input">'
+                      +'</div>'
+                      +'</div>'
+
+                      +'<div class="layui-form-item">'
+                      +'<label class="layui-form-label">性别</label>'
+                      +'<div class="layui-input-block">'
+                      +'<input type="radio" name="sex" value="male" title="男" checked>'
+                      +'<input type="radio" name="sex" value="female" title="女" >'
+                      +'</div>'
+                      +'</div>'
+
+                      +'<div class="layui-form-item layui-form-text">'
+                      +'<label class="layui-form-label">个人简介</label>'
+                      +'<div class="layui-input-block">'
+                      +'<textarea name="introduction" lay-verify="required" placeholder="请输入个人简介" class="layui-textarea"></textarea>'
+                      +'</div>'
+                      +'</div>'
+
+                      +'<div class="layui-form-item">'
+                      +'<div class="layui-input-block">'
+                      +'<button class="layui-btn" lay-submit lay-filter="submitBtn">立即提交</button>'
+                      +'<button type="reset" class="layui-btn layui-btn-primary">重置</button>'
+                      +'</div>'
+                      +'</div>'
+
+                      +'</form>'
+                      +'</div>'
+          });  
+        }
+      });
+
+      //监听行工具事件
+      table.on('tool(usersTest)', function(obj){
+        var data = obj.data;
+        if(obj.event === 'del'){
+          layer.confirm('确定删除此用户及其作品吗？', function(index){
+            $.post("/users_list/delUser",{user_id: data._id},function(result){
+                if(result.status = "ok"){
+                    window.location.reload();
+                }else{
+                    alert('删除失败');
+                }
+            });
+            obj.del();  //删除对应行（tr）的DOM结构
+            layer.close(index);  //向服务端发送删除指令
+          });
+        } else if(obj.event === 'detail') {
+          $.post("/users_list/findOneUser",{user_id: data._id},function(res){
+              if(res.success){
+                let userList = res.resultList
+                layer.open({
+                  type: 1 //Page层类型
+                  ,area: ['800px', '500px']
+                  ,title: '详情'
+                  ,shade: 0.6 //遮罩透明度
+                  ,maxmin: true //允许全屏最小化
+                  ,anim: 1 //0-6的动画形式，-1不开启
+                  ,success: function(layero, index){
+                    form.render();
+                    //表单初始赋值
+                    form.val('userForm', {
+                       "user_id": userList._id
+                      ,"headImg": userList.headImg
+                      ,"coverImg": userList.coverImg
+                      ,"userId": userList.userId
+                      ,"password": userList.password
+                      ,"username": userList.username
+                      ,"sex": userList.sex
+                      ,"introduction": userList.introduction
+                    })
+
+                    var headImg = ''
+                    var coverImg = ''
+
+                    //头像上传
+                    var uploadHeadImg = upload.render({
+                      elem: '#headImgBox'
+                      ,url: '/upload/upload'
+                      ,before: function(obj){
+                        //预读本地文件示例，不支持ie8
+                        obj.preview(function(index, file, result){
+                          $('#headImg').attr('src', result); //图片链接（base64）
+                        });
+                      }
+                      ,done: function(res){
+                        headImg = 'http://localhost:3000/images/upload/' + res[0].filename
+                        document.getElementById("headImgName").value = headImg
+                      }
+                    });
+
+                    //背景图片上传
+                    var uploadCoverImg = upload.render({
+                      elem: '#coverImgBox'
+                      ,url: '/upload/upload'
+                      ,before: function(obj){
+                        //预读本地文件示例，不支持ie8
+                        obj.preview(function(index, file, result){
+                          $('#coverImg').attr('src', result); //图片链接（base64）
+                        });
+                      }
+                      ,done: function(res){
+                        coverImg = 'http://localhost:3000/images/upload/' + res[0].filename
+                        document.getElementById("coverImgName").value = coverImg
+                      }
+                    });
+
+
+                  }
+                  ,content: '<div style="padding:50px;">'
+                            +'<form id="userForm" class="layui-form" action="/users_list/updateUser" method="post" lay-filter="userForm" >'
+
+                            +'<div class="layui-form-item">'
+                            +'<label class="layui-form-label">头像和背景</label>'
+                            +'<div id="headImgBox" style="width:100px;height:100px;position:relative;overflow:hidden;display: inline-block;">'
+                            +'<img id="headImg" style="width:100%;position:absolute;top:50%;left:50%;transform: translate(-50%, -50%);" src="'+userList.headImg+'"></img>'
+                            +'</div>'
+                            +'<div id="coverImgBox" style="width:200px;height:100px;position:relative;overflow:hidden;display:inline-block;margin-left:20px;">'
+                            +'<img id="coverImg" style="width:100%;position:absolute;top:50%;left:50%;transform: translate(-50%, -50%);" src="'+userList.coverImg+'"></img>'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div style="display:none;">'
+                            +'<div class="layui-input-block">'
+                            +'<input type="text" name="user_id" >'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div style="display:none;">'
+                            +'<div class="layui-input-block">'
+                            +'<input id="headImgName" type="text" name="headImg" >'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div style="display:none;">'
+                            +'<div class="layui-input-block">'
+                            +'<input id="coverImgName" type="text" name="coverImg" >'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item">'
+                            +'<label class="layui-form-label">用户名</label>'
+                            +'<div class="layui-input-block">'
+                            +'<input type="text" name="userId" lay-verify="required" autocomplete="off" placeholder="请输入用户名" class="layui-input">'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item">'
+                            +'<label class="layui-form-label">密码</label>'
+                            +'<div class="layui-input-block">'
+                            +'<input type="text" name="password" lay-verify="required" autocomplete="off" placeholder="请输入密码" class="layui-input">'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item">'
+                            +'<label class="layui-form-label">昵称</label>'
+                            +'<div class="layui-input-block">'
+                            +'<input type="text" name="username" lay-verify="required" autocomplete="off" placeholder="请输入昵称" class="layui-input">'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item">'
+                            +'<label class="layui-form-label">性别</label>'
+                            +'<div class="layui-input-block">'
+                            +'<input type="radio" name="sex" value="male" title="男" checked>'
+                            +'<input type="radio" name="sex" value="female" title="女" >'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item layui-form-text">'
+                            +'<label class="layui-form-label">个人简介</label>'
+                            +'<div class="layui-input-block">'
+                            +'<textarea name="introduction" lay-verify="required" placeholder="请输入个人简介" class="layui-textarea"></textarea>'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item">'
+                            +'<div class="layui-input-block">'
+                            +'<button class="layui-btn" lay-submit lay-filter="submitBtn">立即提交</button>'
+                            +'<button type="reset" class="layui-btn layui-btn-primary">重置</button>'
+                            +'</div>'
+                            +'</div>'
+
+                            +'</form>'
+                            +'</div>'
+                });    
+              }
+          });
+        }
+      });
+
+
+      //监听提交
+      form.on('submit(submitBtn)', function(data){
+        layer.confirm('确定提交吗？', {
+          btn: ['确认','取消'] //按钮
+        }, function(){
+          $("#userForm").submit();//重点一！！！模拟提交！！
+        }, function(){
+          layer.msg('已取消');
+          return false;
+        });
+          return false;//重点二！！！！  阻止提交行为！！
+      });
+      
+    });
+  </script>
+</body>
+</html>

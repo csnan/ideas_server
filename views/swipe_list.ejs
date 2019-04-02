@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>轮播图列表</title>
+  <link rel="stylesheet" href="/layui/css/layui.css">
+  <style>
+    .layui-table-cell {
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <table id="swipeTable" lay-filter="swipeTest"></table>
+  <script src="/layui/layui.js"></script>
+  <script type="text/html" id="addIcon">
+    <div class="layui-btn-container">
+      <button id="uploadBtn" class="layui-btn layui-btn-sm" lay-event="upload">上传</button>
+    </div>
+  </script>
+  <script type="text/html" id="handleIcon">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+  </script>
+  <script>
+    layui.use(['table', 'layer', 'upload', 'jquery'], function(){
+      var table = layui.table;
+      var layer = layui.layer;
+      var upload = layui.upload;
+      var $ = layui.$;
+      
+      //第一个实例
+      table.render({
+        elem: '#swipeTable'
+        ,url: '' //数据接口
+        ,toolbar: '#addIcon'
+        ,data: <%- JSON.stringify(swipe)%>
+        ,cols: [[ //表头
+          {field: 'swipe_image', title: '轮播图', align: "center", templet: function (d) { return '<div><img src='+d.swipe_image+'></div>'}}
+          ,{title:'操作', toolbar: '#handleIcon', width: 300}
+        ]]
+      });
+
+      //多图片上传
+      upload.render({
+        elem: '#uploadBtn'
+        ,url: '/upload/upload'
+        ,accept: 'file'
+        ,multiple: true
+        ,before: function(obj){
+          layer.load(); //上传loading
+        }
+        ,done: function(res){
+          layer.closeAll('loading'); //关闭loading
+          let swipe_image = 'http://localhost:3000/images/upload/' + res[0].filename
+
+          $.post("/swipe_list/findAllSwipe",function(res){
+            if(res.success) {
+              if(res.resultList.length >= 4) {
+                layer.msg('上传失败，只能有四张轮播图！');
+              } else {
+                $.post("/swipe_list/addSwipe",{swipe_image: swipe_image},function(res){
+                  if(res.success) {
+                    window.location.reload();
+                  }
+                });
+              }
+            }
+          });
+        }
+      });
+
+
+      //监听行工具事件
+      table.on('tool(swipeTest)', function(obj){
+        var data = obj.data;
+        if(obj.event === 'del'){
+          layer.confirm('确定删除吗？', function(index){
+            $.post("/swipe_list/delSwipe",{swipe_id: data._id},function(result){
+                if(result.status = "ok"){
+                    window.location.reload();
+                }else{
+                    alert('删除失败');
+                }
+            });
+            obj.del();  //删除对应行（tr）的DOM结构
+            layer.close(index);  //向服务端发送删除指令
+          });
+        }
+      });
+
+      
+      
+    });
+  </script>
+</body>
+</html>

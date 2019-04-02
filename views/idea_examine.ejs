@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>审核</title>
+  <link rel="stylesheet" href="/layui/css/layui.css">
+</head>
+<body>
+  <table id="ideaTable" lay-filter="ideaTest"></table>
+  <script src="/layui/layui.js"></script>
+  <script type="text/html" id="handleIcon">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="pass">通过</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="nopass">不通过</a>
+  </script>
+  <script>
+    layui.use(['table', 'layer', 'jquery'], function(){
+      var table = layui.table;
+      var layer = layui.layer;
+      var $ = layui.$;
+      
+      //第一个实例
+      table.render({
+        elem: '#ideaTable'
+        ,url: '' //数据接口
+        ,data: <%- JSON.stringify(idea)%>
+        ,page: true //开启分页
+        ,cols: [[ //表头
+          {field: 'idea_time', title: '发布时间', width: 150, sort: true, fixed: 'left'}
+          ,{field: 'type', title: '作品类型', width: 100,
+            templet: function (d) {
+              if(d.type == 'article') {
+                return '文章'
+              } else if (d.type == 'photo') {
+                return '图片'
+              } else if (d.type == 'music') {
+                return '音乐'
+              } else if (d.type == 'video') {
+                return '视频'
+              }
+            }
+          }
+          ,{field: 'author', title: '作者', width: 120}
+          ,{field: 'idea_title', title: '作品标题', width: 300}
+          ,{field: 'idea_content', title: '作品内容（简介）'}
+          ,{fixed: 'right', title:'审核', toolbar: '#handleIcon', width: 300}
+        ]]
+      });
+
+      //监听行工具事件
+      table.on('tool(ideaTest)', function(obj){
+        var data = obj.data;
+        console.log(obj)
+        if(obj.event === 'pass'){
+          layer.confirm('确定通过审核？', function(index){
+            $.post("/idea_examine/pass",{idea_id: data._id},function(result){
+                if(result.status = "ok"){
+                    window.location.reload();
+                }else{
+                    alert('审核失败');
+                }
+            });
+            obj.del();  //删除对应行（tr）的DOM结构
+            layer.close(index);  //向服务端发送删除指令
+          });
+        } else if(obj.event === 'nopass') {
+          layer.confirm('确定删除吗？', function(index){
+            $.post("/idea/delIdea",{idea_id: data._id},function(result){
+                if(result.status = "ok"){
+                    window.location.reload();
+                }else{
+                    alert('删除失败');
+                }
+            });
+            obj.del();  //删除对应行（tr）的DOM结构
+            layer.close(index);  //向服务端发送删除指令
+          });
+        }
+      });
+      
+      
+    });
+  </script>
+</body>
+</html>
