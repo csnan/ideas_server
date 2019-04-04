@@ -117,6 +117,8 @@ router.post('/uploadIdea', upload.any(), function(req,res,next){
   let idea_images = req.body.idea_images
   let idea_file = req.body.idea_file
   let idea_time = req.body.idea_time
+  let like_num = 0
+  let read_num = 0
   let pass = req.body.pass
   let recommend = false
 
@@ -131,6 +133,8 @@ router.post('/uploadIdea', upload.any(), function(req,res,next){
     idea_images,
     idea_file,
     idea_time,
+    like_num,
+    read_num,
     pass,
     recommend,
   }
@@ -163,6 +167,8 @@ router.post('/uploadIdea/photo', function(req,res,next){
   let idea_content = req.body.idea_content
   let idea_images = req.body.idea_images
   let idea_time = req.body.idea_time
+  let like_num = 0
+  let read_num = 0
   let pass = req.body.pass
   let recommend = false
 
@@ -175,6 +181,8 @@ router.post('/uploadIdea/photo', function(req,res,next){
     idea_content,
     idea_images,
     idea_time,
+    like_num,
+    read_num,
     pass,
     recommend,
   }

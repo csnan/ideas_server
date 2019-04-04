@@ -12,6 +12,9 @@ const ideaSchema = new Schema({
   idea_images: Array,  //作品图片集
   idea_file: String,  //作品文件
   idea_time: String,  //作品时间
+  like_num: Number,  //点赞数
+  like_user: Array, //点赞用户
+  read_num: Number,  //访问量
   pass: Boolean,  //审核通过
   recommend: Boolean,  //文章推荐
   comments:[  //评论

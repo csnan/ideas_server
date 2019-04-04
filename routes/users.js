@@ -221,8 +221,8 @@ router.post('/addFocus', function(req, res, next) {
 })
 
 
-//查询所有关注
-router.post('/findFocus', function(req, res, next) {
+//查询多个用户信息
+router.post('/findArrayIdUser', function(req, res, next) {
   let _ids = req.body._ids
 
   User.find({
@@ -239,6 +239,68 @@ router.post('/findFocus', function(req, res, next) {
       res.send({
         success: true,
         message: '查询成功',
+        resultList: response
+      })
+    }
+  })
+})
+
+//添加收藏
+router.post('/addCollection', function(req, res, next) {
+  let user_id = req.body.user_id
+  let collection_id = req.body.collection_id
+
+  User.update({_id: user_id},{'$push': {
+    collection_id: collection_id
+  }},function(err, response){
+    if(err){
+      console.log("err"+err)
+      res.send({ 
+        success: false,
+        message: '更新失败'
+      })
+    } else {
+      User.findById({
+        _id: user_id
+      }, function(err, response) {
+        if(err){
+          console.log("err"+err)
+          res.send({ 
+            success: false,
+            message: '查询失败'
+          })
+        } else {
+          console.log(response)
+          res.send({
+            success: true,
+            message: '查询成功',
+            resultList: response
+          })
+        }
+      })
+    }
+  })
+})
+
+//删除收藏
+router.post('/delCollection', function(req, res, next) {
+  let user_id = req.body.user_id
+  let collection_id = req.body.collection_id
+
+  User.update({_id: user_id},{'$pull': {
+    collection_id: collection_id
+  }},function(err, response){
+    if(err){
+      console.log("err"+err)
+      res.send({ 
+        success: false,
+        message: '更新失败'
+      })
+    } else {
+      console.log(response)
+      res.send({
+        success: true,
+        message: '更新成功',
         resultList: response
       })
     }

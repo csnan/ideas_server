@@ -165,8 +165,8 @@ router.post('/findIdeaName',function(req,res,next){
   });
 });
 
-//查询所有关注的用户作品
-router.post('/findFocusIdea', function(req, res, next) {
+//查询多个用户的作品
+router.post('/findArrayIdIdea', function(req, res, next) {
   let _ids = req.body._ids
 
   Idea.find({
@@ -183,6 +183,130 @@ router.post('/findFocusIdea', function(req, res, next) {
       res.send({
         success: true,
         message: '查询成功',
+        resultList: response
+      })
+    }
+  })
+})
+
+//查询多个作品信息
+router.post('/findArrayIdea', function(req, res, next) {
+  let _ids = req.body._ids
+
+  Idea.find({
+    _id: { $in: _ids}
+  }, function(err, response) {
+    if(err){
+      console.log("err"+err)
+      res.send({ 
+        success: false,
+        message: '查询失败'
+      })
+    } else {
+      console.log(response)
+      res.send({
+        success: true,
+        message: '查询成功',
+        resultList: response
+      })
+    }
+  })
+})
+
+//更新点赞
+router.post('/updateLikeNum', function(req, res, next) {
+  let idea_id = req.body.idea_id
+  let like_num = req.body.like_num
+  let json = { like_num }
+  Idea.update({
+    _id: idea_id
+  }, json, function(err, response) {
+    if(err){
+      console.log("err"+err)
+      res.send({ 
+        success: false,
+        message: '更新失败'
+      })
+    } else {
+      console.log(response)
+      res.send({
+        success: true,
+        message: '更新成功',
+        resultList: response
+      })
+    }
+  })
+})
+
+//增加点赞用户
+router.post('/addLikeUser', function(req, res, next) {
+  let idea_id = req.body.idea_id
+  let like_user = req.body.like_user
+
+  Idea.update({_id: idea_id},{'$push': {
+    like_user: like_user
+  }},function(err, response){
+    if(err){
+      console.log("err"+err)
+      res.send({ 
+        success: false,
+        message: '更新失败'
+      })
+    } else {
+      console.log(response)
+      res.send({
+        success: true,
+        message: '更新成功',
+        resultList: response
+      })
+    }
+  })
+})
+
+//减少点赞用户
+router.post('/reduceLikeUser', function(req, res, next) {
+  let idea_id = req.body.idea_id
+  let like_user = req.body.like_user
+
+  Idea.update({_id: idea_id},{'$pull': {
+    like_user: like_user
+  }},function(err, response){
+    if(err){
+      console.log("err"+err)
+      res.send({ 
+        success: false,
+        message: '更新失败'
+      })
+    } else {
+      console.log(response)
+      res.send({
+        success: true,
+        message: '更新成功',
+        resultList: response
+      })
+    }
+  })
+})
+
+//更新访问量
+router.post('/updateReadNum', function(req, res, next) {
+  let idea_id = req.body.idea_id
+  let read_num = req.body.read_num
+  let json = { read_num }
+  Idea.update({
+    _id: idea_id
+  }, json, function(err, response) {
+    if(err){
+      console.log("err"+err)
+      res.send({ 
+        success: false,
+        message: '更新失败'
+      })
+    } else {
+      console.log(response)
+      res.send({
+        success: true,
+        message: '更新成功',
         resultList: response
       })
     }
