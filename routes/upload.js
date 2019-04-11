@@ -34,7 +34,7 @@ router.post('/upload', upload.any(), function(req, res, next) {
 //上传用户头像，并向数据库中更新查找数据
 router.post('/uploadHeadImg', upload.any(), function(req, res, next) {
   let _id = req.body._id
-  let headImg = "http://localhost:3000/images/upload/" + req.files[0].filename;
+  let headImg = "http://192.168.43.202:8080/images/upload/" + req.files[0].filename;
   let json = { headImg }
   User.update({
     _id: _id
@@ -71,7 +71,7 @@ router.post('/uploadHeadImg', upload.any(), function(req, res, next) {
 //上传个人主页背景，并向数据库中更新查找数据
 router.post('/uploadCoverImg', upload.any(), function(req, res, next) {
   let _id = req.body._id
-  let coverImg = "http://localhost:3000/images/upload/" + req.files[0].filename
+  let coverImg = "http://192.168.43.202:8080/images/upload/" + req.files[0].filename
   let json = { coverImg }
   User.update({
     _id: _id
@@ -109,11 +109,12 @@ router.post('/uploadCoverImg', upload.any(), function(req, res, next) {
 router.post('/uploadIdea', upload.any(), function(req,res,next){
   let type = req.body.type
   let author_id = req.body.author_id
+  let author_phone = req.body.author_phone
   let author = req.body.author
   let author_img = req.body.author_img
   let idea_title = req.body.idea_title
   let idea_content = req.body.idea_content
-  let idea_img = "http://localhost:3000/images/upload/" + req.files[0].filename
+  let idea_img = "http://192.168.43.202:8080/images/upload/" + req.files[0].filename
   let idea_images = req.body.idea_images
   let idea_file = req.body.idea_file
   let idea_time = req.body.idea_time
@@ -125,6 +126,7 @@ router.post('/uploadIdea', upload.any(), function(req,res,next){
   let json = {
     type,
     author_id,
+    author_phone,
     author,
     author_img,
     idea_title,
@@ -161,6 +163,7 @@ router.post('/uploadIdea', upload.any(), function(req,res,next){
 router.post('/uploadIdea/photo', function(req,res,next){
   let type = req.body.type
   let author_id = req.body.author_id
+  let author_phone = req.body.author_phone
   let author = req.body.author
   let author_img = req.body.author_img
   let idea_title = req.body.idea_title
@@ -175,6 +178,7 @@ router.post('/uploadIdea/photo', function(req,res,next){
   let json = {
     type,
     author_id,
+    author_phone,
     author,
     author_img,
     idea_title,

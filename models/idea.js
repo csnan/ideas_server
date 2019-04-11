@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const ideaSchema = new Schema({
   type: String,  //作品类型
   author_id: String,  //作者id（数据库id）
+  author_phone: String, //作者手机号码（用户名）
   author: String,  //作者昵称
   author_img: String,  //作者头像
   idea_title: String,  //作品标题

@@ -39,7 +39,7 @@
         ,page: true //开启分页
         ,cols: [[ //表头
            {field: 'idea_time', title: '发布时间', width: 150, sort: true, fixed: 'left'}
-          ,{field: 'author', title: '作者', width: 120}
+          ,{field: 'author_phone', title: '作者', width: 120}
           ,{field: 'idea_title', title: '作品标题', width: 300}
           ,{field: 'idea_content', title: '作品简介'}
           ,{fixed: 'right', title:'操作', toolbar: '#handleIcon', width: 300}
@@ -52,14 +52,13 @@
         if(obj.event === 'del'){
           layer.confirm('确定删除吗？', function(index){
             $.post("/idea/delIdea",{idea_id: data._id},function(result){
-                if(result.status = "ok"){
-                    window.location.reload();
-                }else{
-                    alert('删除失败');
-                }
+              if(result.status == "ok"){
+                obj.del();  //删除对应行（tr）的DOM结构
+                layer.close(index);  //向服务端发送删除指令
+              }else{
+                layer.msg('删除失败');
+              }
             });
-            obj.del();  //删除对应行（tr）的DOM结构
-            layer.close(index);  //向服务端发送删除指令
           });
         } else if(obj.event === 'detail') {
           $.post("/idea/findOneIdea",{_id: data._id},function(res){

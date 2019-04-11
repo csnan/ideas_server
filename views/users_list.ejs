@@ -102,7 +102,7 @@
                   });
                 }
                 ,done: function(res){
-                  headImg = 'http://localhost:3000/images/upload/' + res[0].filename
+                  headImg = 'http://192.168.43.202:8080/images/upload/' + res[0].filename
                   document.getElementById("headImgName").value = headImg
                 }
               });
@@ -118,7 +118,7 @@
                   });
                 }
                 ,done: function(res){
-                  coverImg = 'http://localhost:3000/images/upload/' + res[0].filename
+                  coverImg = 'http://192.168.43.202:8080/images/upload/' + res[0].filename
                   document.getElementById("coverImgName").value = coverImg
                 }
               });
@@ -211,14 +211,13 @@
         if(obj.event === 'del'){
           layer.confirm('确定删除此用户及其作品吗？', function(index){
             $.post("/users_list/delUser",{user_id: data._id},function(result){
-                if(result.status = "ok"){
-                    window.location.reload();
+                if(result.status == "ok"){
+                  obj.del();  //删除对应行（tr）的DOM结构
+                  layer.close(index);  //向服务端发送删除指令
                 }else{
-                    alert('删除失败');
+                  layer.msg('删除失败');
                 }
             });
-            obj.del();  //删除对应行（tr）的DOM结构
-            layer.close(index);  //向服务端发送删除指令
           });
         } else if(obj.event === 'detail') {
           $.post("/users_list/findOneUser",{user_id: data._id},function(res){
@@ -259,7 +258,7 @@
                         });
                       }
                       ,done: function(res){
-                        headImg = 'http://localhost:3000/images/upload/' + res[0].filename
+                        headImg = 'http://192.168.43.202:8080/images/upload/' + res[0].filename
                         document.getElementById("headImgName").value = headImg
                       }
                     });
@@ -275,7 +274,7 @@
                         });
                       }
                       ,done: function(res){
-                        coverImg = 'http://localhost:3000/images/upload/' + res[0].filename
+                        coverImg = 'http://192.168.43.202:8080/images/upload/' + res[0].filename
                         document.getElementById("coverImgName").value = coverImg
                       }
                     });

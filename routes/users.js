@@ -13,8 +13,8 @@ router.post('/register', function (req, res, next) {
   let userId = req.body.userId
   let password = req.body.password
   let username = userId
-  let headImg = "http://localhost:3000/images/upload/default/defaultImg.jpg"
-  let coverImg = "http://localhost:3000/images/upload/default/defaultImg.jpg"
+  let headImg = "http://192.168.43.202:8080/images/upload/default/defaultImg.jpg"
+  let coverImg = "http://192.168.43.202:8080/images/upload/default/defaultImg.jpg"
   let sex = "male"
   let introduction = "一个有想法的人"
   let register_time = req.body.register_time
@@ -220,6 +220,43 @@ router.post('/addFocus', function(req, res, next) {
   })
 })
 
+//取消关注
+router.post('/delFocus', function(req, res, next) {
+  let _id = req.body._id
+  let focus_id = req.body.focus_id
+
+  User.update({_id: _id},{'$pull': {
+    focus_id: focus_id
+  }},function(err, response){
+    if(err){
+      console.log("err"+err)
+      res.send({ 
+        success: false,
+        message: '更新失败'
+      })
+    } else {
+      User.findById({
+        _id: _id
+      }, function(err, response) {
+        if(err){
+          console.log("err"+err)
+          res.send({ 
+            success: false,
+            message: '查询失败'
+          })
+        } else {
+          console.log(response)
+          res.send({
+            success: true,
+            message: '查询成功',
+            resultList: response
+          })
+        }
+      })
+    }
+  })
+})
+
 
 //查询多个用户信息
 router.post('/findArrayIdUser', function(req, res, next) {
@@ -297,11 +334,23 @@ router.post('/delCollection', function(req, res, next) {
         message: '更新失败'
       })
     } else {
-      console.log(response)
-      res.send({
-        success: true,
-        message: '更新成功',
-        resultList: response
+      User.findById({
+        _id: user_id
+      }, function(err, response) {
+        if(err){
+          console.log("err"+err)
+          res.send({ 
+            success: false,
+            message: '查询失败'
+          })
+        } else {
+          console.log(response)
+          res.send({
+            success: true,
+            message: '查询成功',
+            resultList: response
+          })
+        }
       })
     }
   })

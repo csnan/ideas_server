@@ -53,7 +53,7 @@
         }
         ,done: function(res){
           layer.closeAll('loading'); //关闭loading
-          let swipe_image = 'http://localhost:3000/images/upload/' + res[0].filename
+          let swipe_image = 'http://192.168.43.202:8080/images/upload/' + res[0].filename
 
           $.post("/swipe_list/findAllSwipe",function(res){
             if(res.success) {
@@ -78,14 +78,13 @@
         if(obj.event === 'del'){
           layer.confirm('确定删除吗？', function(index){
             $.post("/swipe_list/delSwipe",{swipe_id: data._id},function(result){
-                if(result.status = "ok"){
-                    window.location.reload();
-                }else{
-                    alert('删除失败');
-                }
+              if(result.status == "ok"){
+                obj.del();  //删除对应行（tr）的DOM结构
+                layer.close(index);  //向服务端发送删除指令
+              }else{
+                layer.msg('删除失败');
+              }
             });
-            obj.del();  //删除对应行（tr）的DOM结构
-            layer.close(index);  //向服务端发送删除指令
           });
         }
       });
