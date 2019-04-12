@@ -6,7 +6,8 @@ let History = require('../server/history');
 
 //查找所有历史纪录
 router.post('/findAllHistory',function(req,res,next){
-  History.find(function(err, response){
+  let user_id = req.body.user_id
+  History.find({user_id: user_id },function(err, response){
     if(err){
       console.log("err"+err)
       res.send({ 
@@ -26,8 +27,9 @@ router.post('/findAllHistory',function(req,res,next){
 
 //添加历史记录
 router.post('/addHistory', function(req, res, next) {
-  let  history_content = req.body.history_content
-  let json = { history_content }
+  let user_id = req.body.user_id
+  let history_content = req.body.history_content
+  let json = { history_content, user_id }
   History.save(json,function(err, response){
     if(err){
       console.log("err"+err)
