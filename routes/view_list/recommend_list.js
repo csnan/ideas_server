@@ -10,6 +10,27 @@ router.get("/", function(req, res, next) {
   });
 })
 
+//查找所有推荐作品
+router.post("/findAllRecommend", function(req, res, next) {
+  Idea.find({recommend: true}, function(err, response) {
+    if(err){
+      console.log("err"+err)
+      res.send({ 
+        success: false,
+        message: '查询失败'
+      })
+    }
+    else{
+      console.log(response)
+      res.send({
+        success: true,
+        message: '查询成功',
+        resultList: response
+      })
+    }
+  });
+})
+
 //送上推荐
 router.post('/recommend',function(req,res,next){
   let idea_id = req.body.idea_id
@@ -53,6 +74,28 @@ router.post('/recommend',function(req,res,next){
           res.render('video_list',{video});
         })
        }
+     }
+  })
+})
+
+//删除推荐
+router.post('/delRecommend',function(req,res,next){
+  let idea_id = req.body.idea_id
+  let recommend = false
+  let json = {recommend}
+  //json,回调
+  Idea.update({_id: idea_id}, json, function(err){
+    let response = {};
+     if(err){
+       response['status'] = 'error';
+       console.log(err);
+       throw err;
+     }else{
+      response['status'] = 'ok';
+      res.send(response);
+      Idea.find({recommend: true},function(err,idea){
+        res.render('recommend_list',{idea});
+      });
      }
   })
 })

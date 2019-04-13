@@ -70,6 +70,10 @@
                       ,"idea_content": articleList.idea_content
                       ,"type": articleList.type
                     })
+
+                    if(articleList.recommend) {
+                      $('#recommend-btn').hide()
+                    }
                   }
                   ,content: '<div style="padding:50px;">'
                             +'<form class="layui-form" id="ideaForm" action="/recommend_list/recommend" method="post" lay-filter="ideaForm" >'
@@ -109,7 +113,7 @@
 
                             +'<div class="layui-form-item">'
                             +'<div class="layui-input-block">'
-                            +'<button class="layui-btn" lay-submit lay-filter="toRecommend">送上推荐</button>'
+                            +'<button id="recommend-btn" class="layui-btn" lay-submit lay-filter="toRecommend">送上推荐</button>'
                             +'</div>'
                             +'</div>'
 

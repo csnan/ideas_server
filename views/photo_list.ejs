@@ -82,6 +82,10 @@
                       ,"type": photoList.type
                     })
 
+                    if(photoList.recommend) {
+                      $('#recommend-btn').hide()
+                    }
+
                     
                     var photoBox = document.getElementById("photoBox");
                     for (let i = 0; i < photoList.idea_images.length; i++) {
@@ -127,7 +131,7 @@
 
                             +'<div class="layui-form-item">'
                             +'<div class="layui-input-block">'
-                            +'<button class="layui-btn" lay-submit lay-filter="toRecommend">送上推荐</button>'
+                            +'<button id="recommend-btn" class="layui-btn" lay-submit lay-filter="toRecommend">送上推荐</button>'
                             +'</div>'
                             +'</div>'
 

@@ -6,6 +6,23 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>审核</title>
   <link rel="stylesheet" href="/layui/css/layui.css">
+  <style>
+    .img-wrap {
+      width:100px;
+      height:100px;
+      position:relative;
+      margin-right: 10px;
+      overflow:hidden;
+      display: inline-block;
+    }
+    .cover-img {
+      width:100px;
+      height:100px;
+      position:relative;
+      overflow:hidden;
+      display: inline-block;
+    }
+  </style>
 </head>
 <body>
   <table id="ideaTable" lay-filter="ideaTest"></table>
@@ -16,7 +33,8 @@
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="nopass">不通过</a>
   </script>
   <script>
-    layui.use(['table', 'layer', 'jquery'], function(){
+    layui.use(['form', 'table', 'layer', 'jquery'], function(){
+      var form = layui.form;
       var table = layui.table;
       var layer = layui.layer;
       var $ = layui.$;
@@ -52,7 +70,6 @@
       //监听行工具事件
       table.on('tool(ideaTest)', function(obj){
         var data = obj.data;
-        console.log(obj)
         if(obj.event === 'pass'){
           layer.confirm('确定通过审核？', function(index){
             $.post("/idea_examine/pass",{idea_id: data._id},function(result){
@@ -74,6 +91,120 @@
                 layer.msg('删除失败');
               }
             });
+          });
+        } else if(obj.event === 'detail') {
+          $.post("/idea/findOneIdea",{_id: data._id},function(res){
+              if(res.success){
+                let ideaList = res.resultList
+                layer.open({
+                  type: 1 //Page层类型
+                  ,area: ['800px', '500px']
+                  ,title: '详情'
+                  ,shade: 0.6 //遮罩透明度
+                  ,maxmin: true //允许全屏最小化
+                  ,anim: 1 //0-6的动画形式，-1不开启
+                  ,success: function(layero, index){
+                    form.render();
+                    //表单初始赋值
+                    form.val('ideaForm', {
+                       "idea_title": ideaList.idea_title
+                      ,"idea_content": ideaList.idea_content
+                    })
+
+                    if(!ideaList.idea_img) {
+                      $('#idea-image').hide()
+                    }
+
+                    if(ideaList.idea_images.length == 0) {
+                      $('#photoBox').hide()
+                    }
+
+                    if(!ideaList.idea_file) {
+                      $('#idea-music').hide()
+                      $('#idea-video').hide()
+                    }
+
+                    var ideaImage = document.getElementById("idea-image");
+                    if(ideaList.type == 'article' || ideaList.type == 'music' || ideaList.type == 'video') {
+                      let oDivImage = document.createElement('div');
+                      oDivImage.className="cover-img";
+                      oDivImage.innerHTML = "<img style='width:100%;position:absolute;top:50%;left:50%;transform: translate(-50%, -50%);' src="+ideaList.idea_img+"></img>";
+                      ideaImage.appendChild(oDivImage);
+                    }
+
+                    var photoBox = document.getElementById("photoBox");
+                    if(ideaList.type == 'photo') {
+                      for (let i = 0; i < ideaList.idea_images.length; i++) {
+                        let oDiv = document.createElement('div');
+                        oDiv.className="img-wrap";
+                        oDiv.innerHTML = "<img style='width:100%;position:absolute;top:50%;left:50%;transform: translate(-50%, -50%);' src="+ideaList.idea_images[i]+">";
+                        photoBox.appendChild(oDiv);
+                      }
+                    }
+
+                    var ideaMusic = document.getElementById("idea-music");
+                    if(ideaList.type == 'music') {
+                      $('#idea-video').hide()
+                      let oDivMusic = document.createElement('div');
+                      oDivMusic.className="layui-input-block";
+                      oDivMusic.innerHTML = "<audio controls src="+ideaList.idea_file+"></audio>";
+                      ideaMusic.appendChild(oDivMusic);
+                    }
+
+                    var ideaVideo = document.getElementById("idea-video");
+                    if(ideaList.type == 'video') {
+                      $('#idea-music').hide()
+                      let oDivVideo = document.createElement('div');
+                      oDivVideo.className="layui-input-block";
+                      oDivVideo.innerHTML = "<video width='400' height='200' controls src="+ideaList.idea_file+"></video>";
+                      ideaVideo.appendChild(oDivVideo);
+                    }
+
+                  }
+                  ,content: '<div style="padding:50px;">'
+                            +'<form class="layui-form" id="ideaForm" lay-filter="ideaForm" >'
+
+                            +'<div class="layui-form-item">'
+                            +'<label class="layui-form-label">标题</label>'
+                            +'<div class="layui-input-block">'
+                            +'<input type="text" name="idea_title" class="layui-input"  disabled="">'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item layui-form-text">'
+                            +'<label class="layui-form-label">正文</label>'
+                            +'<div class="layui-input-block">'
+                            +'<textarea name="idea_content" class="layui-textarea" disabled=""></textarea>'
+                            +'</div>'
+                            +'</div>'
+
+                            +'<div id="idea-image" class="layui-form-item">'
+                            +'<label class="layui-form-label">封面</label>'
+                            +'</div>'
+
+                            +'<div id="photoBox" class="layui-form-item">'
+                            +'<label class="layui-form-label">图片集</label>'
+                            +'</div>'
+
+                            +'<div id="idea-music" class="layui-form-item">'
+                            +'<label class="layui-form-label">音乐文件</label>'
+                            +'</div>'
+
+                            +'<div id="idea-video" class="layui-form-item">'
+                            +'<label class="layui-form-label">视频文件</label>'
+                            +'</div>'
+
+                            +'<div class="layui-form-item">'
+                            +'<div class="layui-input-block">'
+                            +'</div>'
+                            +'</div>'
+
+                            +'</form>'
+                            +'</div>'
+                });    
+              }else{
+                layer.msg('查看失败');
+              }
           });
         }
       });
