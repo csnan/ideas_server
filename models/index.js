@@ -11,3 +11,4 @@ exports.User = require('./users');
 exports.Idea = require('./idea');
 exports.Swipe = require('./swipe');
 exports.History = require('./history');
+exports.Report = require('./report');

@@ -18,6 +18,7 @@ var idea_examineRouter = require('./routes/view_list/idea_examine');
 var recommend_listRouter = require('./routes/view_list/recommend_list');
 var swipe_listRouter = require('./routes/view_list/swipe_list');
 var historyRouter = require('./routes/history');
+var report_listRouter = require('./routes/view_list/report_list');
 
 var app = express();
 
@@ -54,6 +55,7 @@ app.use('/idea_examine', idea_examineRouter);
 app.use('/recommend_list', recommend_listRouter);
 app.use('/swipe_list', swipe_listRouter);
 app.use('/history', historyRouter);
+app.use('/report_list', report_listRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

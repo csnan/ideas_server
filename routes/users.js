@@ -356,4 +356,78 @@ router.post('/delCollection', function(req, res, next) {
   })
 })
 
+//添加足迹
+router.post('/addFootprint', function(req, res, next) {
+  let user_id = req.body.user_id
+  let footprint_id = req.body.footprint_id
+
+  User.update({_id: user_id},{'$push': {
+    footprint_id: footprint_id
+  }},function(err, response){
+    if(err){
+      console.log("err"+err)
+      res.send({ 
+        success: false,
+        message: '更新失败'
+      })
+    } else {
+      User.findById({
+        _id: user_id
+      }, function(err, response) {
+        if(err){
+          console.log("err"+err)
+          res.send({ 
+            success: false,
+            message: '查询失败'
+          })
+        } else {
+          console.log(response)
+          res.send({
+            success: true,
+            message: '查询成功',
+            resultList: response
+          })
+        }
+      })
+    }
+  })
+})
+
+//删除足迹
+router.post('/delFootprint', function(req, res, next) {
+  let user_id = req.body.user_id
+  let footprint_id = req.body.footprint_id
+
+  User.update({_id: user_id},{'$pull': {
+    footprint_id: footprint_id
+  }},function(err, response){
+    if(err){
+      console.log("err"+err)
+      res.send({ 
+        success: false,
+        message: '更新失败'
+      })
+    } else {
+      User.findById({
+        _id: user_id
+      }, function(err, response) {
+        if(err){
+          console.log("err"+err)
+          res.send({ 
+            success: false,
+            message: '查询失败'
+          })
+        } else {
+          console.log(response)
+          res.send({
+            success: true,
+            message: '查询成功',
+            resultList: response
+          })
+        }
+      })
+    }
+  })
+})
+
 module.exports = router;
