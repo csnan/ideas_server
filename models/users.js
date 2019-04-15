@@ -11,7 +11,6 @@ const usersSchema = new Schema({
   introduction: String,  //个人简介
   register_time: String,  //注册时间
   focus_id: Array,  //关注
-  like_id: Array,  //点赞
   collection_id: Array,  //收藏
   footprint_id: Array  //足迹
 });
